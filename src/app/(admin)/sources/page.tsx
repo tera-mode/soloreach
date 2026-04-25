@@ -1,6 +1,6 @@
 import { getFirestore } from "@/lib/firestore/client";
 import { QuickAddForm } from "./QuickAddForm";
-import { Icon } from "@iconify/react";
+import { IconRss, IconLink, IconText } from "@/components/icons/NavIcons";
 import type { ContentSource } from "@/lib/firestore/schemas";
 
 async function fetchData() {
@@ -39,7 +39,7 @@ export default async function SourcesPage() {
       <div className="card">
         <div className="card-header">
           <span className="card-title">ネタを追加して生成</span>
-          <Icon icon="mdi:lightning-bolt" style={{ color: "var(--terracotta)", fontSize: 16 }} />
+          <span style={{ color: "var(--terracotta)", fontSize: 16 }}>⚡</span>
         </div>
         <div className="card-body">
           <QuickAddForm services={services} />
@@ -55,7 +55,7 @@ export default async function SourcesPage() {
 
         {!hasSources ? (
           <div className="empty-state">
-            <Icon icon="mdi:rss-box" style={{ fontSize: 40, color: "var(--text-dim)" }} />
+            <IconRss size={40} color="var(--text-dim)" />
             <p className="empty-title">RSSソースが未登録</p>
             <p className="empty-sub">
               ブログの RSS URL を登録すると、新記事が出るたびに自動でドラフトを生成します
@@ -115,10 +115,10 @@ export default async function SourcesPage() {
                   borderBottom: i < history.length - 1 ? "1px solid rgba(255,255,255,0.30)" : "none",
                 }}
               >
-                <Icon
-                  icon={item.sourceUrl ? "mdi:link" : "mdi:text"}
-                  style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 2, flexShrink: 0 }}
-                />
+                {item.sourceUrl
+                  ? <IconLink size={15} color="var(--text-muted)" />
+                  : <IconText size={15} color="var(--text-muted)" />
+                }
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     margin: 0, fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-soft)",
@@ -154,7 +154,7 @@ function AddRssInline({ compact }: { compact?: boolean }) {
       display: "flex", alignItems: "center", gap: 8,
       borderTop: compact ? "1px solid rgba(255,255,255,0.30)" : "none",
     }}>
-      <Icon icon="mdi:plus-circle-outline" style={{ fontSize: 16, color: "var(--terracotta)" }} />
+      <span style={{ fontSize: 16, color: "var(--terracotta)" }}>＋</span>
       <span style={{ fontFamily: "var(--font-sans)", fontSize: 12.5, color: "var(--text-muted)" }}>
         RSS URL を登録する（準備中）
       </span>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Icon } from "@iconify/react";
+import { IconCheck, IconClose, IconChevronDown, IconChevronUp } from "@/components/icons/NavIcons";
 
 const SCORE_COLOR = (s: number) =>
   s >= 80 ? "var(--sage)" : s >= 60 ? "var(--ochre)" : s >= 40 ? "var(--terracotta)" : "var(--navy)";
@@ -289,10 +289,10 @@ function DraftCard({ draft, isLast, onApprove, onReject, disabled }: {
           <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: scoreColor }}>
             {draft.estimatedReachScore}
           </span>
-          <Icon
-            icon={expanded ? "mdi:chevron-up" : "mdi:chevron-down"}
-            style={{ fontSize: 16, color: "var(--text-dim)", flexShrink: 0 }}
-          />
+          {expanded
+            ? <IconChevronUp size={16} color="var(--text-dim)" />
+            : <IconChevronDown size={16} color="var(--text-dim)" />
+          }
         </div>
 
         {/* フック */}
@@ -352,7 +352,7 @@ function DraftCard({ draft, isLast, onApprove, onReject, disabled }: {
             onClick={(e) => { e.stopPropagation(); onApprove(draft.id); }}
             disabled={disabled}
           >
-            <Icon icon="mdi:check" style={{ fontSize: 14 }} />
+            <IconCheck size={14} color="#fff" />
             ストック
           </button>
           <button
@@ -360,7 +360,7 @@ function DraftCard({ draft, isLast, onApprove, onReject, disabled }: {
             onClick={(e) => { e.stopPropagation(); onReject(draft.id); }}
             disabled={disabled}
           >
-            <Icon icon="mdi:close" style={{ fontSize: 14 }} />
+            <IconClose size={14} />
             没
           </button>
         </div>

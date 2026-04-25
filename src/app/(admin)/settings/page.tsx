@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Icon } from "@iconify/react";
+import { IconLogout, IconCog, IconCalendar, IconRss } from "@/components/icons/NavIcons";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function SettingsPage() {
@@ -56,7 +56,7 @@ export default function SettingsPage() {
               color: "var(--text-muted)", fontFamily: "var(--font-sans)", fontSize: 12, cursor: "pointer",
             }}
           >
-            <Icon icon="mdi:logout" style={{ fontSize: 14 }} />
+            <IconLogout size={14} />
             ログアウト
           </button>
         </div>
@@ -66,7 +66,7 @@ export default function SettingsPage() {
       <div className="card">
         <div className="card-header">
           <span className="card-title">X (Twitter) 接続</span>
-          <Icon icon="mdi:twitter" style={{ fontSize: 16, color: "var(--navy)" }} />
+          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--navy)" }}>𝕏</span>
         </div>
         <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {xConnected && (
@@ -75,7 +75,7 @@ export default function SettingsPage() {
               background: "var(--sage-glass)", color: "var(--sage)",
               fontFamily: "var(--font-sans)", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
             }}>
-              <Icon icon="mdi:check-circle" style={{ fontSize: 16 }} /> X アカウントを接続しました
+              ✅ X アカウントを接続しました
             </div>
           )}
           <p className="label">OAuth 2.0 PKCE で接続します。ドラフト承認後の自動投稿に必要です。</p>
@@ -90,7 +90,7 @@ export default function SettingsPage() {
             style={{ justifyContent: "center" }}
             onClick={() => { if (serviceId) window.location.href = `/api/integrations/x/install?serviceId=${serviceId}`; }}
           >
-            <Icon icon="mdi:twitter" style={{ fontSize: 15 }} />
+            <span style={{ fontWeight: 700 }}>𝕏</span>
             X で接続する
           </button>
         </div>
@@ -103,18 +103,18 @@ export default function SettingsPage() {
         </div>
         <div className="card-body">
           {[
-            ["mdi:calendar-month-outline", "配信スケジュール設定"],
-            ["mdi:shield-check-outline", "リスクフィルター管理"],
-            ["mdi:rss", "RSS ソース追加"],
-          ].map(([icon, label]) => (
+            ["📅", "配信スケジュール設定"],
+            ["🛡️", "リスクフィルター管理"],
+            ["📡", "RSS ソース追加"],
+          ].map(([emoji, label]) => (
             <div key={label} style={{
               display: "flex", alignItems: "center", gap: 10,
               padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.25)",
               opacity: 0.6,
             }}>
-              <Icon icon={icon} style={{ fontSize: 18, color: "var(--text-muted)" }} />
+              <span style={{ fontSize: 16 }}>{emoji}</span>
               <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)" }}>{label}</span>
-              <Icon icon="mdi:chevron-right" style={{ fontSize: 16, color: "var(--text-dim)", marginLeft: "auto" }} />
+              <span style={{ color: "var(--text-dim)", marginLeft: "auto", fontSize: 18 }}>›</span>
             </div>
           ))}
         </div>

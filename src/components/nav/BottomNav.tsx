@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Icon } from "@iconify/react";
+import { IconRss, IconFileDoc, IconCalendar, IconChart, IconCog } from "@/components/icons/NavIcons";
 
 const TABS = [
-  { href: "/sources",  label: "ソース",    icon: "mdi:rss",                     activeIcon: "mdi:rss" },
-  { href: "/drafts",   label: "ドラフト",  icon: "mdi:file-document-outline",    activeIcon: "mdi:file-document" },
-  { href: "/schedule", label: "配信",      icon: "mdi:calendar-month-outline",   activeIcon: "mdi:calendar-month" },
-  { href: "/insights", label: "分析",      icon: "mdi:chart-areaspline",         activeIcon: "mdi:chart-areaspline" },
-  { href: "/settings", label: "設定",      icon: "mdi:cog-outline",              activeIcon: "mdi:cog" },
+  { href: "/sources",  label: "ソース",   Icon: IconRss },
+  { href: "/drafts",   label: "ドラフト", Icon: IconFileDoc },
+  { href: "/schedule", label: "配信",     Icon: IconCalendar },
+  { href: "/insights", label: "分析",     Icon: IconChart },
+  { href: "/settings", label: "設定",     Icon: IconCog },
 ] as const;
 
 export function BottomNav() {
@@ -25,21 +25,22 @@ export function BottomNav() {
         transform: "translateX(-50%)",
         width: "100%",
         maxWidth: 520,
-        height: 68,
-        borderRadius: "var(--r-xl) var(--r-xl) 0 0",
+        height: 64,
+        borderRadius: "20px 20px 0 0",
         zIndex: 200,
         display: "flex",
         alignItems: "stretch",
         borderBottom: "none",
-        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {TABS.map((tab) => {
-        const active = pathname.startsWith(tab.href);
+      {TABS.map(({ href, label, Icon }) => {
+        const active = pathname.startsWith(href);
+        const color = active ? "var(--terracotta)" : "var(--text-muted)";
+
         return (
           <button
-            key={tab.href}
-            onClick={() => router.push(tab.href)}
+            key={href}
+            onClick={() => router.push(href)}
             style={{
               flex: 1,
               display: "flex",
@@ -52,37 +53,33 @@ export function BottomNav() {
               cursor: "pointer",
               padding: "8px 4px",
               position: "relative",
+              WebkitTapHighlightColor: "transparent",
             }}
           >
+            {/* アクティブインジケーター */}
             {active && (
               <span style={{
                 position: "absolute",
                 top: 0,
                 left: "50%",
                 transform: "translateX(-50%)",
-                width: 28,
+                width: 24,
                 height: 3,
-                borderRadius: "0 0 var(--r-pill) var(--r-pill)",
+                borderRadius: "0 0 4px 4px",
                 background: "var(--terracotta)",
               }} />
             )}
-            <Icon
-              icon={active ? tab.activeIcon : tab.icon}
-              style={{
-                fontSize: 22,
-                color: active ? "var(--terracotta)" : "var(--text-muted)",
-                transition: "color 0.15s",
-              }}
-            />
+
+            <Icon size={22} color={color} />
+
             <span style={{
               fontFamily: "var(--font-sans)",
               fontSize: 10,
               fontWeight: active ? 700 : 500,
-              color: active ? "var(--terracotta)" : "var(--text-muted)",
-              letterSpacing: "-0.01em",
-              transition: "color 0.15s",
+              color,
+              letterSpacing: "0.01em",
             }}>
-              {tab.label}
+              {label}
             </span>
           </button>
         );
