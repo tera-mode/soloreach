@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/**/*": [
+      "./node_modules/@google-cloud/tasks/build/**",
+      "./node_modules/@google-cloud/firestore/build/**",
+      "./node_modules/@google-cloud/storage/build/**",
+      "./node_modules/google-gax/build/**",
+      "./node_modules/@grpc/grpc-js/build/**",
+    ],
+  },
   serverExternalPackages: [
     "@google-cloud/tasks",
     "@google-cloud/firestore",
