@@ -11,24 +11,24 @@
   --bg-image: url("/image/bg01.jpg");
   --bg-overlay: linear-gradient(
     135deg,
-    rgba(255, 250, 240, 0.35) 0%,
-    rgba(244, 236, 223, 0.25) 50%,
-    rgba(255, 250, 240, 0.40) 100%
+    rgba(248, 244, 236, 0.55) 0%,
+    rgba(240, 232, 218, 0.45) 50%,
+    rgba(248, 244, 236, 0.58) 100%
   );
 
-  /* Glass Layers */
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-blur: blur(24px) saturate(140%);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.50);
-  --glass-bg-strong: rgba(255, 255, 255, 0.85);
-  --glass-blur-strong: blur(16px) saturate(140%);
-  --glass-bg-subtle: rgba(255, 255, 255, 0.35);
+  /* Glass Layers — 視認性重視に調整 */
+  --glass-bg: rgba(255, 255, 255, 0.76);
+  --glass-blur: blur(28px) saturate(160%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+  --glass-bg-strong: rgba(255, 255, 255, 0.93);
+  --glass-blur-strong: blur(20px) saturate(160%);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.58);
 
-  /* Text */
-  --text: #1F1A14;
-  --text-soft: #3D352B;
-  --text-muted: rgba(50, 42, 32, 0.65);
-  --text-dim: rgba(50, 42, 32, 0.45);
+  /* Text — コントラスト強化 */
+  --text: #1A1510;
+  --text-soft: #2E2820;
+  --text-muted: rgba(40, 34, 26, 0.80);
+  --text-dim: rgba(40, 34, 26, 0.60);
 
   /* Accents – Nordic Palette */
   --terracotta: #C97757;
@@ -42,9 +42,9 @@
   --cream: #F4ECDF;
 
   /* Shadows */
-  --shadow: 0 8px 32px rgba(40, 35, 30, 0.12), 0 2px 8px rgba(40, 35, 30, 0.06);
-  --shadow-soft: 0 4px 20px rgba(40, 35, 30, 0.08);
-  --shadow-lg: 0 20px 60px rgba(40, 35, 30, 0.18), 0 4px 16px rgba(40, 35, 30, 0.08);
+  --shadow: 0 8px 32px rgba(40, 35, 30, 0.18), 0 2px 8px rgba(40, 35, 30, 0.10);
+  --shadow-soft: 0 4px 20px rgba(40, 35, 30, 0.12);
+  --shadow-lg: 0 20px 60px rgba(40, 35, 30, 0.24), 0 4px 16px rgba(40, 35, 30, 0.12);
 
   /* Border Radius Scale */
   --r-pill: 9999px;
@@ -81,15 +81,15 @@ html, body {
   background: var(--glass-bg-strong);
   backdrop-filter: var(--glass-blur-strong);
   -webkit-backdrop-filter: var(--glass-blur-strong);
-  border: 1px solid rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.80);
   box-shadow: var(--shadow);
 }
 
 .glass-subtle {
   background: var(--glass-bg-subtle);
-  backdrop-filter: blur(12px) saturate(130%);
-  -webkit-backdrop-filter: blur(12px) saturate(130%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
 }
 
 /* ─── App Background ─────────────────────────────────────────── */
