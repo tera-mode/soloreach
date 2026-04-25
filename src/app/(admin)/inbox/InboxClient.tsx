@@ -252,8 +252,8 @@ export function InboxClient({ draftGroups }: InboxClientProps) {
           <DraftCard
             key={draft.id}
             id={draft.id}
-            angle={draft.angle}
-            content={draft.content}
+            angle={draft.angle ?? "DATA"}
+            content={draft.content ?? draft.body ?? ""}
             hashtags={draft.hashtags}
             accent={ACCENT_COLORS[i % ACCENT_COLORS.length]}
             selected={selectedDraftId === draft.id}

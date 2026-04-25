@@ -22,7 +22,7 @@ export function buildDraftGenerationPrompt(
 
 ## サービス情報
 - サービス名: ${service.name}
-- トーン: ${service.tone}
+- トーン: ${service.defaultTone}
 - CTA: ${service.ctaText || "なし"} ${service.ctaUrl ? `(${service.ctaUrl})` : ""}
 - ハッシュタグプール: ${service.hashtagPool || "なし"}
 

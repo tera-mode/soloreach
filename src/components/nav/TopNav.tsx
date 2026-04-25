@@ -6,9 +6,10 @@ import { getFirebaseApp } from "@/lib/auth/firebase-client";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_TABS = [
-  { label: "Inbox", href: "/inbox" },
-  { label: "Published", href: "/published" },
-  { label: "Learning", href: "/learning" },
+  { label: "Sources", href: "/sources" },
+  { label: "Drafts", href: "/drafts" },
+  { label: "Schedule", href: "/schedule" },
+  { label: "Insights", href: "/insights" },
   { label: "Settings", href: "/settings" },
 ];
 

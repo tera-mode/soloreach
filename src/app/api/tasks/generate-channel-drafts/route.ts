@@ -81,37 +81,55 @@ export async function POST(req: NextRequest) {
   );
 
   const now = Timestamp.now();
+  const batchId = contentBaseId;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = candidates as any[];
+
   const draftRefs = await Promise.all(
-    candidates.map((c) =>
+    raw.map((c) =>
       db.collection("channelDrafts").add({
         contentBaseId,
         serviceId,
         channel: "x",
-        angle: c.angle,
-        content: c.content,
-        hashtags: c.hashtags,
-        imageAssetId: null,
+        batchId,
+        angle: c.angle ?? "DATA",
+        tone: c.tone ?? "friendly",
+        format: c.format ?? "TEXT",
+        hook: c.hook ?? (c.content ?? "").slice(0, 15),
+        body: c.body ?? c.content ?? "",
+        bodyShort: c.bodyShort ?? null,
+        selfReplyText: c.selfReplyText ?? null,
+        hashtags: c.hashtags ?? [],
+        estimatedReachScore: c.estimatedReachScore ?? 50,
+        riskFlags: [],
         status: "PENDING_REVIEW",
         slackMessageTs: null,
         scheduledAt: null,
+        freshnessExpiresAt: null,
         createdAt: now,
         decidedAt: null,
-      } satisfies Omit<ChannelDraft, "slackMessageTs"> & {
-        slackMessageTs: null;
       })
     )
   );
 
-  const draftsWithIds = candidates.map((c, i) => ({
+  const draftsWithIds = raw.map((c, i) => ({
     ...c,
     id: draftRefs[i].id,
     contentBaseId,
     serviceId,
     channel: "x" as const,
-    imageAssetId: null,
+    batchId,
+    tone: (c.tone ?? "friendly") as "formal" | "friendly" | "playful",
+    format: (c.format ?? "TEXT") as "TEXT" | "IMAGE" | "VIDEO" | "POLL" | "THREAD" | "LONGFORM",
+    hook: c.hook ?? "",
+    body: c.body ?? c.content ?? "",
+    riskFlags: [] as string[],
+    estimatedReachScore: c.estimatedReachScore ?? 50,
     status: "PENDING_REVIEW" as const,
     slackMessageTs: null,
     scheduledAt: null,
+    freshnessExpiresAt: null,
     createdAt: now,
     decidedAt: null,
   }));
@@ -121,7 +139,7 @@ export async function POST(req: NextRequest) {
     slackTs = await sendDraftNotification(
       draftsWithIds,
       base.title,
-      base.sourceUrl
+      base.sourceUrl ?? ""
     );
 
     if (slackTs) {

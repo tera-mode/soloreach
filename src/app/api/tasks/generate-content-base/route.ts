@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
   });
 
   await enqueueTask({
-    queue: "draft-generation",
+    queue: "draft-batch-generation",
     payload: { contentBaseId: ref.id, serviceId },
   });
 

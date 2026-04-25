@@ -1,85 +1,37 @@
 {
   "indexes": [
-    {
-      "collectionGroup": "contentSources",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "serviceId", "order": "ASCENDING" },
-        { "fieldPath": "enabled", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "contentBases",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "serviceId", "order": "ASCENDING" },
-        { "fieldPath": "ingestedAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "channelDrafts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "serviceId", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "channelDrafts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "contentBaseId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "channelDrafts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "publishExecutions",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "serviceId", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "outcomeSnapshots",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "publishId", "order": "ASCENDING" },
-        { "fieldPath": "measuredAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "knowledgeEntries",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "channel", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "knowledgeEntries",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "serviceId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "generationLogs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    }
+    { "collectionGroup": "contentSources", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "enabled", "order": "ASCENDING" }] },
+    { "collectionGroup": "contentBases", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "ingestedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "ideas", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "scheduledAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "estimatedReachScore", "order": "DESCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "contentBaseId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "channel", "order": "ASCENDING" }, { "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "publishExecutions", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "publishedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "outcomeSnapshots", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "publishId", "order": "ASCENDING" }, { "fieldPath": "measuredAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "knowledgeEntries", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "channel", "order": "ASCENDING" }, { "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "knowledgeEntries", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "knowledgeEntries", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "channel", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "seasonalEvents", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "ASCENDING" }] },
+    { "collectionGroup": "channelHealthSnapshots", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "measuredAt", "order": "DESCENDING" }] }
   ],
   "fieldOverrides": []
 }

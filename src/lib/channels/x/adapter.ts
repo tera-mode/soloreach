@@ -32,7 +32,7 @@ export class XAdapter implements ChannelAdapter {
     const raw = await generateText(prompt, {
       type: "pro",
       contextType: "draft-generation",
-      contextId: base.sourceUrl,
+      contextId: base.sourceUrl ?? base.title,
     });
 
     const jsonMatch = raw.match(/\{[\s\S]*\}/);

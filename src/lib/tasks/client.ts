@@ -15,11 +15,15 @@ function getClient(): CloudTasksClient {
 }
 
 export type QueueName =
+  | "idea-ingestion"
   | "content-base-generation"
+  | "draft-batch-generation"
   | "draft-generation"
+  | "creative-generation"
   | "draft-publish"
   | "outcome-measurement"
-  | "knowledge-building";
+  | "knowledge-building"
+  | "news-fast-track";
 
 interface EnqueueOptions {
   queue: QueueName;
@@ -47,11 +51,15 @@ export async function enqueueTask({
   const queuePath = client.queuePath(projectId, location, queue);
 
   const urlMap: Record<QueueName, string> = {
+    "idea-ingestion": `${baseUrl}/api/tasks/ingest-idea`,
     "content-base-generation": `${baseUrl}/api/tasks/generate-content-base`,
+    "draft-batch-generation": `${baseUrl}/api/tasks/generate-draft-batch`,
     "draft-generation": `${baseUrl}/api/tasks/generate-channel-drafts`,
+    "creative-generation": `${baseUrl}/api/tasks/generate-creative`,
     "draft-publish": `${baseUrl}/api/tasks/publish-draft`,
     "outcome-measurement": `${baseUrl}/api/tasks/measure-outcome`,
     "knowledge-building": `${baseUrl}/api/tasks/build-knowledge`,
+    "news-fast-track": `${baseUrl}/api/tasks/ingest-idea`,
   };
 
   await client.createTask({
