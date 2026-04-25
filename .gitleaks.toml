@@ -1,0 +1,68 @@
+# gitleaks 設定
+# 詳細: https://github.com/gitleaks/gitleaks
+# 実行: `gitleaks detect --source . -v`
+#       `gitleaks protect --staged -v`  ← pre-commit で
+
+title = "SoloReach gitleaks config"
+
+[allowlist]
+# .env.example のプレースホルダ値は許容
+paths = [
+  '''\.env\.example$''',
+  '''\.gitleaks\.toml$''',
+  '''package-lock\.json$''',
+]
+
+# Gemini API
+[[rules]]
+id = "gemini-api-key"
+description = "Google Gemini API key (AIza...)"
+regex = '''AIza[0-9A-Za-z_-]{35}'''
+keywords = ["AIza"]
+
+# GCP Service Account Key
+[[rules]]
+id = "gcp-service-account-key-json"
+description = "GCP Service Account Key (JSON structure)"
+regex = '''"type"\s*:\s*"service_account"'''
+keywords = ["service_account"]
+
+[[rules]]
+id = "gcp-private-key"
+description = "GCP private key in PEM format"
+regex = '''-----BEGIN PRIVATE\s+KEY-----'''
+keywords = ["PRIVATE KEY"]
+
+# Slack
+[[rules]]
+id = "slack-bot-token"
+description = "Slack Bot Token (xoxb-...)"
+regex = '''xoxb-[0-9]{10,}-[0-9]{10,}-[a-zA-Z0-9]{24,}'''
+keywords = ["xoxb-"]
+
+[[rules]]
+id = "slack-user-token"
+description = "Slack User Token (xoxp-...)"
+regex = '''xoxp-[0-9]{10,}-[0-9]{10,}-[0-9]{10,}-[a-zA-Z0-9]{32,}'''
+keywords = ["xoxp-"]
+
+# X (Twitter)
+[[rules]]
+id = "x-bearer-token"
+description = "X (Twitter) Bearer Token"
+regex = '''AAAA[A-Za-z0-9%]{80,}'''
+keywords = ["AAAA"]
+
+# Firebase
+[[rules]]
+id = "firebase-api-key"
+description = "Firebase Web API key"
+regex = '''AIza[0-9A-Za-z_-]{35}'''
+keywords = ["AIza"]
+
+# 一般的なAPIキー
+[[rules]]
+id = "generic-api-key"
+description = "Generic API key in env-style assignment"
+regex = '''(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*["']?[a-zA-Z0-9_\-]{32,}["']?'''
+keywords = ["api_key", "apikey", "api-key", "secret", "token", "password"]

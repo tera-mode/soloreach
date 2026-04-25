@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Fonts */
+  --font-sans: "Inter", "Noto Sans JP", system-ui, sans-serif;
+  --font-serif: "Fraunces", "Noto Serif JP", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Background */
+  --bg-image: url("/image/bg01.jpg");
+  --bg-overlay: linear-gradient(
+    135deg,
+    rgba(255, 250, 240, 0.35) 0%,
+    rgba(244, 236, 223, 0.25) 50%,
+    rgba(255, 250, 240, 0.40) 100%
+  );
+
+  /* Glass Layers */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-blur: blur(24px) saturate(140%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.50);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-blur-strong: blur(16px) saturate(140%);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.35);
+
+  /* Text */
+  --text: #1F1A14;
+  --text-soft: #3D352B;
+  --text-muted: rgba(50, 42, 32, 0.65);
+  --text-dim: rgba(50, 42, 32, 0.45);
+
+  /* Accents – Nordic Palette */
+  --terracotta: #C97757;
+  --terracotta-glass: rgba(201, 119, 87, 0.18);
+  --sage: #7C9482;
+  --sage-glass: rgba(124, 148, 130, 0.18);
+  --ochre: #D4A864;
+  --ochre-glass: rgba(212, 168, 100, 0.20);
+  --navy: #3A4A5C;
+  --navy-glass: rgba(58, 74, 92, 0.15);
+  --cream: #F4ECDF;
+
+  /* Shadows */
+  --shadow: 0 8px 32px rgba(40, 35, 30, 0.12), 0 2px 8px rgba(40, 35, 30, 0.06);
+  --shadow-soft: 0 4px 20px rgba(40, 35, 30, 0.08);
+  --shadow-lg: 0 20px 60px rgba(40, 35, 30, 0.18), 0 4px 16px rgba(40, 35, 30, 0.08);
+
+  /* Border Radius Scale */
+  --r-pill: 9999px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+  --r-2xl: 20px;
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-sans);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Glass Utilities ────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--shadow);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: var(--shadow);
+}
+
+.glass-subtle {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* ─── App Background ─────────────────────────────────────────── */
+.app-bg {
+  min-height: 100vh;
+  background-image: var(--bg-overlay), var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* ─── Pipeline Pulse Animation ───────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+}
+
+.pulse-ring {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(50, 42, 32, 0.2);
+  border-radius: var(--r-pill);
+}
+
+/* ─── Focus Ring ─────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 2px;
+}

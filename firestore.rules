@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All data access goes through Next.js API routes using firebase-admin SDK.
+    // Direct client access is denied entirely.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
