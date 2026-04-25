@@ -79,19 +79,21 @@ function UnifiedCard({
     <div
       className={flyClass}
       style={{
-        background: cardStatus === "rejected" ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.70)",
+        background: cardStatus === "rejected" ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.76)",
         opacity: cardStatus === "rejected" ? 0.72 : 1,
-        borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.35)",
+        borderRadius: "var(--r-md)",
+        border: "1px solid rgba(255,255,255,0.60)",
+        boxShadow: "0 2px 10px rgba(40,35,30,0.07)",
         position: "relative",
+        overflow: "hidden",
         transformOrigin: "center top",
       }}
     >
       {/* 左アクセントライン（全タブ共通） */}
       <div style={{
-        position: "absolute", left: 0, top: 10, bottom: 10, width: 3,
-        borderRadius: "0 4px 4px 0",
+        position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
         background: accentColor,
-        boxShadow: cardStatus === "idea" ? `0 0 6px ${scoreColor}50` : "none",
+        boxShadow: cardStatus === "idea" ? `0 0 8px ${scoreColor}50` : "none",
       }} />
 
       {/* タップエリア */}
@@ -373,9 +375,9 @@ export function DraftsClient({
                     {batchDate.toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
-                {/* カード群 */}
-                <div style={{ background: "rgba(255,255,255,0.30)", backdropFilter: "blur(20px)" }}>
-                  {items.map((d, idx) => (
+                {/* カード群 — 各カードを分離 */}
+                <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 8, background: "rgba(255,255,255,0.20)", backdropFilter: "blur(16px)" }}>
+                  {items.map((d) => (
                     <UnifiedCard
                       key={d.id}
                       id={d.id}
@@ -388,7 +390,7 @@ export function DraftsClient({
                       estimatedReachScore={d.estimatedReachScore}
                       riskFlags={d.riskFlags}
                       cardStatus="idea"
-                      isLast={idx === items.length - 1}
+                      isLast={true}
                       flyClass={flying[d.id] === "ok" ? "flying-ok" : flying[d.id] === "reject" ? "flying-reject" : ""}
                       onApprove={handleApprove}
                       onReject={handleReject}
@@ -415,8 +417,8 @@ export function DraftsClient({
             </div>
           )}
           {okDrafts.length > 0 && (
-            <div className="card">
-              {okDrafts.map((d, i) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {okDrafts.map((d) => (
                 <UnifiedCard
                   key={d.id}
                   id={d.id}
@@ -427,7 +429,7 @@ export function DraftsClient({
                   selfReplyText={d.selfReplyText}
                   estimatedReachScore={d.estimatedReachScore}
                   cardStatus="ok"
-                  isLast={i === okDrafts.length - 1}
+                  isLast={true}
                 />
               ))}
             </div>
@@ -447,8 +449,8 @@ export function DraftsClient({
             </div>
           )}
           {historyDrafts.length > 0 && (
-            <div className="card">
-              {historyDrafts.map((d, i) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {historyDrafts.map((d) => (
                 <UnifiedCard
                   key={d.id}
                   id={d.id}
@@ -457,7 +459,7 @@ export function DraftsClient({
                   body={d.body}
                   estimatedReachScore={50}
                   cardStatus="rejected"
-                  isLast={i === historyDrafts.length - 1}
+                  isLast={true}
                 />
               ))}
             </div>
