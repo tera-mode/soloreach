@@ -1,92 +1,163 @@
 import { getFirestore } from "@/lib/firestore/client";
 import { QuickAddForm } from "./QuickAddForm";
-import { GlassPanel } from "@/components/glass/GlassPanel";
+import { Icon } from "@iconify/react";
 import type { ContentSource } from "@/lib/firestore/schemas";
 
 async function fetchData() {
   try {
     const db = getFirestore();
-    const [sourcesSnap, servicesSnap] = await Promise.all([
+    const [sourcesSnap, servicesSnap, basesSnap] = await Promise.all([
       db.collection("contentSources").orderBy("createdAt", "desc").limit(20).get(),
       db.collection("services").limit(5).get(),
+      db.collection("contentBases").orderBy("ingestedAt", "desc").limit(20).get(),
     ]);
-    const sources = sourcesSnap.docs.map((d) => ({
+    const sources = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as ContentSource) }));
+    const services = servicesSnap.docs.map((d) => ({ id: d.id, name: (d.data().name as string) ?? "未設定" }));
+    const history = basesSnap.docs.map((d) => ({
       id: d.id,
-      ...(d.data() as ContentSource),
+      title: d.data().title as string,
+      sourceUrl: d.data().sourceUrl as string | null,
+      ingestedAt: (d.data().ingestedAt as { toMillis(): number })?.toMillis() ?? 0,
     }));
-    const services = servicesSnap.docs.map((d) => ({
-      id: d.id,
-      name: (d.data().name as string) ?? "（名前未設定）",
-    }));
-    return { sources, services };
+    return { sources, services, history };
   } catch {
-    return { sources: [], services: [] };
+    return { sources: [], services: [], history: [] };
   }
 }
 
 export default async function SourcesPage() {
-  const { sources, services } = await fetchData();
+  const { sources, services, history } = await fetchData();
+  const hasSources = sources.length > 0;
 
   return (
-    <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="page-wrap">
+      <div className="page-header">
+        <h1 className="page-heading">Sources</h1>
+      </div>
 
-      {/* クイック追加フォーム */}
-      <GlassPanel title="ネタを追加してドラフト生成" sub="URL または フリーテキスト">
-        <QuickAddForm services={services} />
-      </GlassPanel>
+      {/* ─ クイック追加 ─ */}
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">ネタを追加して生成</span>
+          <Icon icon="mdi:lightning-bolt" style={{ color: "var(--terracotta)", fontSize: 16 }} />
+        </div>
+        <div className="card-body">
+          <QuickAddForm services={services} />
+        </div>
+      </div>
 
-      {/* 登録済みソース一覧 */}
-      <GlassPanel
-        title="登録済み RSS / Sitemap ソース"
-        sub={`${sources.length}件`}
-        action="追加"
-      >
-        {sources.length === 0 ? (
-          <p style={{
-            fontFamily: "var(--font-sans)", fontSize: 14,
-            color: "var(--text-muted)", textAlign: "center", padding: "24px 0", margin: 0,
-          }}>
-            登録済みのソースはありません。
-          </p>
+      {/* ─ RSS ソース一覧 ─ */}
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">RSS / Sitemap</span>
+          <span className="meta">{sources.length}件</span>
+        </div>
+
+        {!hasSources ? (
+          <div className="empty-state">
+            <Icon icon="mdi:rss-box" style={{ fontSize: 40, color: "var(--text-dim)" }} />
+            <p className="empty-title">RSSソースが未登録</p>
+            <p className="empty-sub">
+              ブログの RSS URL を登録すると、新記事が出るたびに自動でドラフトを生成します
+            </p>
+            <AddRssInline />
+          </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div>
             {sources.map((s) => (
               <div
                 key={s.id}
                 style={{
-                  display: "flex", alignItems: "center", gap: 12,
-                  padding: "10px 14px", borderRadius: "var(--r-md)",
-                  background: "rgba(255,255,255,0.3)",
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "11px 14px",
+                  borderBottom: "1px solid rgba(255,255,255,0.30)",
                 }}
               >
-                <span style={{
-                  padding: "2px 8px", borderRadius: "var(--r-pill)",
-                  background: s.enabled ? "var(--sage-glass)" : "rgba(255,255,255,0.2)",
+                <span className="badge" style={{
+                  background: s.enabled ? "var(--sage-glass)" : "rgba(200,190,180,0.25)",
                   color: s.enabled ? "var(--sage)" : "var(--text-muted)",
-                  fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
+                  flexShrink: 0,
                 }}>
-                  {s.type}
+                  {(s.type as string).replace("_", " ")}
                 </span>
                 <span style={{
-                  fontFamily: "var(--font-sans)", fontSize: 13,
-                  color: "var(--text-soft)", flex: 1,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  fontFamily: "var(--font-sans)", fontSize: 12.5, color: "var(--text-soft)",
+                  flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
                   {(s.config as Record<string, unknown>)?.url as string ?? s.id}
                 </span>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  color: "var(--text-dim)", flexShrink: 0,
-                }}>
+                <span className="meta">
                   {s.lastPolledAt
-                    ? new Date(s.lastPolledAt.toMillis()).toLocaleDateString("ja-JP")
-                    : "未取得"}
+                    ? new Date(s.lastPolledAt.toMillis()).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })
+                    : "未"}
+                </span>
+              </div>
+            ))}
+            <AddRssInline compact />
+          </div>
+        )}
+      </div>
+
+      {/* ─ 追加履歴 ─ */}
+      {history.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">追加履歴</span>
+            <span className="meta">{history.length}件</span>
+          </div>
+          <div>
+            {history.map((item, i) => (
+              <div
+                key={item.id}
+                style={{
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  padding: "10px 14px",
+                  borderBottom: i < history.length - 1 ? "1px solid rgba(255,255,255,0.30)" : "none",
+                }}
+              >
+                <Icon
+                  icon={item.sourceUrl ? "mdi:link" : "mdi:text"}
+                  style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 2, flexShrink: 0 }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    margin: 0, fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-soft)",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    {item.title}
+                  </p>
+                  {item.sourceUrl && (
+                    <p style={{
+                      margin: "1px 0 0", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-dim)",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {item.sourceUrl}
+                    </p>
+                  )}
+                </div>
+                <span className="meta" style={{ flexShrink: 0 }}>
+                  {new Date(item.ingestedAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
                 </span>
               </div>
             ))}
           </div>
-        )}
-      </GlassPanel>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddRssInline({ compact }: { compact?: boolean }) {
+  return (
+    <div style={{
+      padding: compact ? "10px 14px" : "0",
+      display: "flex", alignItems: "center", gap: 8,
+      borderTop: compact ? "1px solid rgba(255,255,255,0.30)" : "none",
+    }}>
+      <Icon icon="mdi:plus-circle-outline" style={{ fontSize: 16, color: "var(--terracotta)" }} />
+      <span style={{ fontFamily: "var(--font-sans)", fontSize: 12.5, color: "var(--text-muted)" }}>
+        RSS URL を登録する（準備中）
+      </span>
     </div>
   );
 }

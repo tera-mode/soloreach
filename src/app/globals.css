@@ -128,3 +128,206 @@ html, body {
   outline: 2px solid var(--terracotta);
   outline-offset: 2px;
 }
+
+/* ─── Mobile-first Layout ────────────────────────────────────── */
+.page-wrap {
+  padding: 12px 14px 88px;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Unified Card ───────────────────────────────────────────── */
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.22);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+}
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.card-body {
+  padding: 12px 14px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  background: var(--terracotta);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(201, 119, 87, 0.35);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--sage);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(124, 148, 130, 0.40);
+  transition: opacity 0.15s;
+}
+.btn-approve:disabled { opacity: 0.5; }
+
+.btn-reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(200, 190, 180, 0.50);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-reject:disabled { opacity: 0.5; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.60);
+  color: var(--text-soft);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+/* ─── Label / Meta text ──────────────────────────────────────── */
+.label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ─── Badge ──────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ─── Input ──────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.60);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--terracotta); }
+.input::placeholder { color: var(--text-dim); }
+
+textarea.input { resize: vertical; }
+
+/* ─── Divider ────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+/* ─── Page Header ────────────────────────────────────────────── */
+.page-header {
+  padding: 14px 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-heading {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Empty State ────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 20px;
+  text-align: center;
+}
+.empty-icon {
+  font-size: 36px;
+  opacity: 0.45;
+}
+.empty-title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--text-soft);
+  margin: 0;
+}
+.empty-sub {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}

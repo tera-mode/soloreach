@@ -1,11 +1,14 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { GlassPanel } from "@/components/glass/GlassPanel";
+import { Icon } from "@iconify/react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SettingsPage() {
   const params = useSearchParams();
+  const router = useRouter();
+  const { user } = useAuth();
   const [serviceId, setServiceId] = useState("");
   const [xConnected, setXConnected] = useState(false);
 
@@ -13,70 +16,109 @@ export default function SettingsPage() {
     if (params.get("x") === "connected") setXConnected(true);
   }, [params]);
 
-  function handleXConnect() {
-    if (!serviceId) {
-      alert("Service ID を入力してください");
-      return;
-    }
-    window.location.href = `/api/integrations/x/install?serviceId=${serviceId}`;
+  async function handleSignOut() {
+    const { getAuth, signOut } = await import("firebase/auth");
+    const { getFirebaseApp } = await import("@/lib/auth/firebase-client");
+    await signOut(getAuth(getFirebaseApp()));
+    router.replace("/login");
   }
 
   return (
-    <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <GlassPanel title="X (Twitter) 接続">
-        {xConnected && (
-          <p style={{
-            fontFamily: "var(--font-sans)", fontSize: 13,
-            color: "var(--sage)", margin: "0 0 16px",
-            padding: "8px 12px", borderRadius: "var(--r-md)",
-            background: "var(--sage-glass)",
+    <div className="page-wrap">
+      <div className="page-header">
+        <h1 className="page-heading">設定</h1>
+      </div>
+
+      {/* ユーザー情報 */}
+      <div className="card">
+        <div className="card-body" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--terracotta), var(--navy))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontFamily: "var(--font-sans)", fontSize: 18, fontWeight: 700,
+            flexShrink: 0,
           }}>
-            ✅ X アカウントを接続しました
-          </p>
-        )}
-
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", margin: "0 0 12px" }}>
-          X OAuth 2.0 PKCE で接続します。接続後、ドラフトの配信が可能になります。
-        </p>
-
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>
-          <input
-            type="text"
-            placeholder="Service ID (Firestore から確認)"
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
-            style={{
-              flex: 1, padding: "9px 14px", borderRadius: "var(--r-md)",
-              border: "1px solid rgba(255,255,255,0.4)",
-              background: "rgba(255,255,255,0.5)", backdropFilter: "blur(8px)",
-              fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text)",
-              outline: "none",
-            }}
-          />
+            {user?.displayName?.[0]?.toUpperCase() ?? "U"}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
+              {user?.displayName ?? "ユーザー"}
+            </p>
+            <p className="label">{user?.email}</p>
+          </div>
           <button
-            onClick={handleXConnect}
+            onClick={handleSignOut}
             style={{
-              padding: "9px 20px", borderRadius: "var(--r-pill)",
-              background: "var(--navy)", color: "#fff",
-              fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 600,
-              border: "none", cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(58,74,92,0.4)",
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "8px 14px", borderRadius: "var(--r-pill)",
+              background: "rgba(200,190,180,0.25)", border: "1px solid rgba(200,190,180,0.40)",
+              color: "var(--text-muted)", fontFamily: "var(--font-sans)", fontSize: 12, cursor: "pointer",
             }}
           >
-            𝕏 で接続
+            <Icon icon="mdi:logout" style={{ fontSize: 14 }} />
+            ログアウト
           </button>
         </div>
+      </div>
 
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: 11.5, color: "var(--text-dim)", margin: 0 }}>
-          必要スコープ: tweet.read / tweet.write / users.read / offline.access
-        </p>
-      </GlassPanel>
+      {/* X 接続 */}
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">X (Twitter) 接続</span>
+          <Icon icon="mdi:twitter" style={{ fontSize: 16, color: "var(--navy)" }} />
+        </div>
+        <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {xConnected && (
+            <div style={{
+              padding: "8px 12px", borderRadius: "var(--r-md)",
+              background: "var(--sage-glass)", color: "var(--sage)",
+              fontFamily: "var(--font-sans)", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <Icon icon="mdi:check-circle" style={{ fontSize: 16 }} /> X アカウントを接続しました
+            </div>
+          )}
+          <p className="label">OAuth 2.0 PKCE で接続します。ドラフト承認後の自動投稿に必要です。</p>
+          <input
+            className="input"
+            placeholder="Service ID（Firestore で確認）"
+            value={serviceId}
+            onChange={(e) => setServiceId(e.target.value)}
+          />
+          <button
+            className="btn-primary"
+            style={{ justifyContent: "center" }}
+            onClick={() => { if (serviceId) window.location.href = `/api/integrations/x/install?serviceId=${serviceId}`; }}
+          >
+            <Icon icon="mdi:twitter" style={{ fontSize: 15 }} />
+            X で接続する
+          </button>
+        </div>
+      </div>
 
-      <GlassPanel title="その他の設定">
-        <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
-          Sprint C（スケジューラー）以降で実装予定です。
-        </p>
-      </GlassPanel>
+      {/* その他 */}
+      <div className="card">
+        <div className="card-header">
+          <span className="card-title">Sprint C 以降で実装予定</span>
+        </div>
+        <div className="card-body">
+          {[
+            ["mdi:calendar-month-outline", "配信スケジュール設定"],
+            ["mdi:shield-check-outline", "リスクフィルター管理"],
+            ["mdi:rss", "RSS ソース追加"],
+          ].map(([icon, label]) => (
+            <div key={label} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.25)",
+              opacity: 0.6,
+            }}>
+              <Icon icon={icon} style={{ fontSize: 18, color: "var(--text-muted)" }} />
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)" }}>{label}</span>
+              <Icon icon="mdi:chevron-right" style={{ fontSize: 16, color: "var(--text-dim)", marginLeft: "auto" }} />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
