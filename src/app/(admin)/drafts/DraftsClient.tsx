@@ -125,12 +125,8 @@ export function DraftsClient({
         position: "sticky",
         top: 0,
         zIndex: 100,
-        backdropFilter: "blur(24px) saturate(150%)",
-        WebkitBackdropFilter: "blur(24px) saturate(150%)",
-        background: "rgba(255,255,255,0.55)",
-        borderBottom: "1px solid rgba(255,255,255,0.45)",
-        margin: "0 -14px",
-        padding: "8px 14px",
+        background: "transparent",
+        padding: "8px 0 6px",
       }}>
         <div style={{ display: "flex", gap: 6, maxWidth: 520 - 28, margin: "0 auto" }}>
           {TABS.map(({ key, label, count }) => {
