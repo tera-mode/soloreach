@@ -4,8 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { IconRss, IconFileDoc, IconCalendar, IconChart, IconCog } from "@/components/icons/NavIcons";
 
 const TABS = [
-  { href: "/sources",  label: "ソース",   Icon: IconRss },
-  { href: "/drafts",   label: "ドラフト", Icon: IconFileDoc },
+  { href: "/sources",  label: "ネタ元",   Icon: IconRss },
+  { href: "/drafts",   label: "アイデア", Icon: IconFileDoc },
   { href: "/schedule", label: "配信",     Icon: IconCalendar },
   { href: "/insights", label: "分析",     Icon: IconChart },
   { href: "/settings", label: "設定",     Icon: IconCog },

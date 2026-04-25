@@ -30,6 +30,8 @@ export default async function DraftsPage() {
     .filter((d) => ["PENDING_REVIEW", "STOCKED", "BLOCKED"].includes(d.status))
     .sort((a, b) => (b.estimatedReachScore ?? 50) - (a.estimatedReachScore ?? 50));
 
+  // 配信OKをアクティブから分離してクライアントに渡す
+
   const history = allDrafts
     .filter((d) => d.status === "REJECTED")
     .slice(0, 40);
