@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { IconCheck, IconClose, IconChevronDown, IconChevronUp } from "@/components/icons/NavIcons";
 
 const SCORE_COLOR = (s: number) =>
@@ -42,6 +42,7 @@ function UnifiedCard({
   flyClass = "",
   onApprove,
   onReject,
+  onRestore,
   disabled,
 }: {
   id: string;
@@ -58,6 +59,7 @@ function UnifiedCard({
   flyClass?: string;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onRestore?: (id: string) => void;
   disabled?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -176,29 +178,39 @@ function UnifiedCard({
         )}
       </div>
 
-      {/* アクションボタン（アイデアタブのみ） */}
-      {cardStatus === "idea" && onApprove && onReject && (
-        <div style={{ display: "flex", gap: 8, padding: "0 12px 11px 16px" }}>
-          <button
-            className="btn-approve"
-            onClick={(e) => { e.stopPropagation(); onApprove(id); }}
-            disabled={disabled}
-            style={{ flex: 1, justifyContent: "center" }}
-          >
-            <IconCheck size={13} color="#fff" />
-            配信OK
-          </button>
-          <button
-            className="btn-reject"
-            onClick={(e) => { e.stopPropagation(); onReject(id); }}
-            disabled={disabled}
-            style={{ flex: 1, justifyContent: "center" }}
-          >
-            <IconClose size={13} />
-            没
-          </button>
-        </div>
-      )}
+      {/* アクションボタン（全タブ表示、ステータスで切替） */}
+      <div style={{ display: "flex", gap: 8, padding: "0 12px 11px 16px" }}>
+        {cardStatus === "idea" && (
+          <>
+            <button className="btn-approve" onClick={(e) => { e.stopPropagation(); onApprove?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              <IconCheck size={13} color="#fff" /> 配信OK
+            </button>
+            <button className="btn-reject" onClick={(e) => { e.stopPropagation(); onReject?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              <IconClose size={13} /> 没
+            </button>
+          </>
+        )}
+        {cardStatus === "ok" && (
+          <>
+            <button className="btn-reject" onClick={(e) => { e.stopPropagation(); onRestore?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              ↩ アイデアに戻す
+            </button>
+            <button className="btn-reject" onClick={(e) => { e.stopPropagation(); onReject?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              <IconClose size={13} /> 没
+            </button>
+          </>
+        )}
+        {cardStatus === "rejected" && (
+          <>
+            <button className="btn-reject" onClick={(e) => { e.stopPropagation(); onRestore?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              ↩ アイデアに戻す
+            </button>
+            <button className="btn-approve" onClick={(e) => { e.stopPropagation(); onApprove?.(id); }} disabled={disabled} style={{ flex: 1, justifyContent: "center" }}>
+              <IconCheck size={13} color="#fff" /> 配信OK
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -215,6 +227,7 @@ export function DraftsClient({
 }) {
   const searchParams = useSearchParams();
   const newBatchId = searchParams.get("new");
+  const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("ideas");
   const [drafts, setDrafts] = useState(activeDrafts);
@@ -252,15 +265,40 @@ export function DraftsClient({
   }
 
   function handleReject(id: string) {
-    setFlying((f) => ({ ...f, [id]: "reject" }));
-    pulsTab("rejected");
-    setTimeout(() => {
+    // アイデアタブからの没
+    const isFromIdea = drafts.some((d) => d.id === id);
+    if (isFromIdea) {
+      setFlying((f) => ({ ...f, [id]: "reject" }));
+      pulsTab("rejected");
+      setTimeout(() => {
+        startTransition(async () => {
+          await fetch(`/api/drafts/${id}/reject`, { method: "POST" });
+          setDrafts((ds) => ds.filter((d) => d.id !== id));
+          setFlying((f) => { const n = { ...f }; delete n[id]; return n; });
+        });
+      }, 200);
+    } else {
+      // 配信OKタブからの没
       startTransition(async () => {
         await fetch(`/api/drafts/${id}/reject`, { method: "POST" });
-        setDrafts((ds) => ds.filter((d) => d.id !== id));
-        setFlying((f) => { const n = { ...f }; delete n[id]; return n; });
+        setOkDrafts((prev) => prev.filter((d) => d.id !== id));
+        pulsTab("rejected");
       });
-    }, 200);
+    }
+  }
+
+  function handleRestore(id: string) {
+    // 配信OK or 没 → アイデアに戻す
+    startTransition(async () => {
+      await fetch(`/api/drafts/${id}/restore`, { method: "POST" });
+      // okDrafts から戻す場合
+      const fromOk = okDrafts.find((d) => d.id === id);
+      if (fromOk) {
+        setOkDrafts((prev) => prev.filter((d) => d.id !== id));
+        setDrafts((prev) => [{ ...fromOk, status: "PENDING_REVIEW" }, ...prev]);
+      }
+      pulsTab("ideas");
+    });
   }
 
   const ideaDrafts = drafts.filter((d) => d.status === "PENDING_REVIEW" || d.status === "BLOCKED");
@@ -430,6 +468,9 @@ export function DraftsClient({
                   estimatedReachScore={d.estimatedReachScore}
                   cardStatus="ok"
                   isLast={true}
+                  onReject={handleReject}
+                  onRestore={handleRestore}
+                  disabled={isPending}
                 />
               ))}
             </div>
@@ -460,6 +501,19 @@ export function DraftsClient({
                   estimatedReachScore={50}
                   cardStatus="rejected"
                   isLast={true}
+                  disabled={isPending}
+                  onRestore={async (id) => {
+                    startTransition(async () => {
+                      await fetch(`/api/drafts/${id}/restore`, { method: "POST" });
+                      router.refresh();
+                    });
+                  }}
+                  onApprove={async (id) => {
+                    startTransition(async () => {
+                      await fetch(`/api/drafts/${id}/approve`, { method: "POST" });
+                      router.refresh();
+                    });
+                  }}
                 />
               ))}
             </div>
