@@ -6,15 +6,22 @@ import type { ChannelDraft } from "@/lib/firestore/schemas";
 async function fetchDrafts(): Promise<(ChannelDraft & { id: string })[]> {
   try {
     const db = getFirestore();
+    // インデックス不要: createdAt だけでソート → クライアント側でスコア順に並べ直す
     const snap = await db
       .collection("channelDrafts")
-      .where("status", "in", ["PENDING_REVIEW", "STOCKED", "BLOCKED"])
-      .orderBy("estimatedReachScore", "desc")
-      .limit(50)
+      .orderBy("createdAt", "desc")
+      .limit(100)
       .get();
 
-    return snap.docs.map((d) => ({ ...(d.data() as ChannelDraft), id: d.id }));
-  } catch {
+    return snap.docs
+      .map((d) => ({ ...(d.data() as ChannelDraft), id: d.id }))
+      .filter((d) =>
+        ["PENDING_REVIEW", "STOCKED", "BLOCKED"].includes(d.status)
+      )
+      .sort((a, b) => (b.estimatedReachScore ?? 50) - (a.estimatedReachScore ?? 50))
+      .slice(0, 60);
+  } catch (e) {
+    console.error("Drafts fetch error:", e);
     return [];
   }
 }
@@ -37,6 +44,7 @@ export default async function DraftsPage() {
 
   return (
     <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+
       {/* ストック残量ヘッダー */}
       <div
         className="glass"
@@ -48,48 +56,51 @@ export default async function DraftsPage() {
           gap: 24,
         }}
       >
-        <div>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)" }}>
-            ストック（承認済み）
-          </span>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 28, fontWeight: 600, color: "var(--sage)", margin: 0 }}>
-            {stockedCount}
-          </p>
-        </div>
-        <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.3)" }} />
-        <div>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)" }}>承認待ち</span>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 28, fontWeight: 600, color: "var(--terracotta)", margin: 0 }}>
-            {pendingCount}
-          </p>
-        </div>
-        <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.3)" }} />
-        <div>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)" }}>要確認</span>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 28, fontWeight: 600, color: "var(--ochre)", margin: 0 }}>
-            {blockedCount}
-          </p>
-        </div>
-        <div style={{ marginLeft: "auto", fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)" }}>
-          リーチスコア高い順に表示
-        </div>
+        {[
+          { label: "承認済みストック", value: stockedCount, color: "var(--sage)" },
+          { label: "承認待ち", value: pendingCount, color: "var(--terracotta)" },
+          { label: "要確認 (BLOCKED)", value: blockedCount, color: "var(--ochre)" },
+        ].map((item, i) => (
+          <>
+            {i > 0 && (
+              <div key={`sep-${i}`} style={{ width: 1, height: 36, background: "rgba(255,255,255,0.4)" }} />
+            )}
+            <div key={item.label}>
+              <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: 11.5, color: "var(--text-muted)" }}>
+                {item.label}
+              </p>
+              <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 26, fontWeight: 700, color: item.color }}>
+                {item.value}
+              </p>
+            </div>
+          </>
+        ))}
+        <p style={{ marginLeft: "auto", fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)", margin: "0 0 0 auto" }}>
+          リーチスコア高い順
+        </p>
       </div>
 
       {/* ドラフトリスト */}
       <GlassPanel title="Drafts" sub={`${drafts.length}本`}>
         {drafts.length === 0 ? (
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-muted)", textAlign: "center", padding: "32px 0", margin: 0 }}>
-            ドラフトがありません。Sources にネタを追加してください。
-          </p>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <p style={{ fontFamily: "var(--font-serif)", fontSize: 16, color: "var(--text-soft)", margin: "0 0 8px" }}>
+              ドラフトがありません
+            </p>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+              <a href="/sources" style={{ color: "var(--terracotta)", textDecoration: "none" }}>Sources</a> でURLやテキストを入力してドラフトを生成してください
+            </p>
+          </div>
         ) : (
           <DraftsClient
             drafts={drafts.map((d) => ({
               id: d.id,
+              batchId: d.batchId ?? d.contentBaseId,
               angle: d.angle ?? "DATA",
               angleLabel: ANGLE_LABELS[d.angle ?? "DATA"] ?? d.angle,
               tone: d.tone ?? "friendly",
               toneLabel: TONE_LABELS[d.tone ?? "friendly"] ?? d.tone,
-              hook: d.hook ?? d.content?.slice(0, 15) ?? "",
+              hook: d.hook ?? (d.content ?? d.body ?? "").slice(0, 15),
               body: d.body ?? d.content ?? "",
               bodyShort: d.bodyShort ?? null,
               selfReplyText: d.selfReplyText ?? null,
@@ -97,6 +108,7 @@ export default async function DraftsPage() {
               estimatedReachScore: d.estimatedReachScore ?? 50,
               status: d.status,
               riskFlags: d.riskFlags ?? [],
+              createdAt: d.createdAt?.toMillis() ?? 0,
             }))}
           />
         )}
