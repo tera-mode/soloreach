@@ -77,7 +77,7 @@ export function DraftsClient({
         setDrafts((ds) => ds.filter((d) => d.id !== id));
         setFlying((f) => { const n = { ...f }; delete n[id]; return n; });
       });
-    }, 380);
+    }, 200);
   }
 
   function handleReject(id: string) {
@@ -90,7 +90,7 @@ export function DraftsClient({
         setDrafts((ds) => ds.filter((d) => d.id !== id));
         setFlying((f) => { const n = { ...f }; delete n[id]; return n; });
       });
-    }, 380);
+    }, 200);
   }
 
   // バッチグループ
@@ -125,10 +125,10 @@ export function DraftsClient({
         position: "sticky",
         top: 0,
         zIndex: 100,
-        backdropFilter: "blur(20px) saturate(160%)",
-        WebkitBackdropFilter: "blur(20px) saturate(160%)",
-        background: "rgba(248,244,236,0.85)",
-        borderBottom: "1px solid rgba(255,255,255,0.40)",
+        backdropFilter: "blur(24px) saturate(150%)",
+        WebkitBackdropFilter: "blur(24px) saturate(150%)",
+        background: "rgba(255,255,255,0.55)",
+        borderBottom: "1px solid rgba(255,255,255,0.45)",
         margin: "0 -14px",
         padding: "8px 14px",
       }}>
