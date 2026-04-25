@@ -95,19 +95,16 @@ export async function POST(req: NextRequest) {
   const batchId = uuid();
   const now = Timestamp.now();
 
+  // selfReplyText はサーバー側で確実に生成（Gemini に任せない）
+  const articleUrl = base.sourceUrl ?? (service as Record<string, unknown>).ctaUrl as string ?? null;
+  const selfReplyText = articleUrl ? `詳しくはこちら ↓\n${articleUrl}` : null;
+
+  const riskFilters = service.riskFilters ?? { forbiddenWords: [], requirePrimarySource: false };
+
   const draftRefs = await Promise.all(
     candidates.map((c) => {
       const score = c.estimatedReachScore ?? calculateReachScore(c);
-      const riskFilters = service.riskFilters ?? {
-        forbiddenWords: [],
-        requirePrimarySource: false,
-      };
-      const riskFlags = detectRiskFlags(
-        c.body,
-        c.angle,
-        c.selfReplyText,
-        riskFilters
-      );
+      const riskFlags = detectRiskFlags(c.body, c.angle, selfReplyText, riskFilters);
       const status = riskFlags.length > 0 ? "BLOCKED" : "PENDING_REVIEW";
 
       return db.collection("channelDrafts").add({
@@ -121,7 +118,7 @@ export async function POST(req: NextRequest) {
         hook: c.hook,
         body: c.body,
         bodyShort: c.bodyShort ?? null,
-        selfReplyText: c.selfReplyText ?? null,
+        selfReplyText,
         longFormContent: c.longFormContent ?? null,
         threadParts: c.threadParts ?? null,
         creativeAssetId: null,

@@ -68,9 +68,9 @@ ${tones}
 1. **hook**: 冒頭15字以内。数字・【ラベル】・逆説・問いかけのいずれかで始める
 2. **body**: 本文100〜140字。URLを絶対に含めない。改行3〜5箇所。末尾は問いかけまたはCTA
 3. **bodyShort**: body を100〜120字に短縮した「拡散ゾーン版」（省略可）
-4. **selfReplyText**: 「詳しくは → [URL]」形式でCTA+記事URLを置く（URLは "${base.sourceUrl ?? service.ctaText ?? "bioのリンク"}" を使用）
+4. **selfReplyText**: 出力不要。サーバー側で自動設定します
 5. **hashtags**: 0〜2個まで（多すぎるとリーチが落ちる）
-6. 絵文字は0〜2個まで（functionall なもの限定: 🔍📅💰⚠️など）
+6. 絵文字は0〜2個まで（機能的なもの限定: 🔍📅💰⚠️など）
 
 ## 出力形式（JSON のみ、前後に説明文不要）
 {
@@ -82,7 +82,6 @@ ${tones}
       "hook": "冒頭15字以内",
       "body": "本文100〜140字",
       "bodyShort": "100〜120字版（作れる場合）",
-      "selfReplyText": "詳しくは → URL",
       "hashtags": ["ハッシュタグ1"],
       "estimatedReachScore": 75
     }

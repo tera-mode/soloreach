@@ -179,10 +179,18 @@ export async function POST(req: NextRequest) {
   const now = Timestamp.now();
   const riskFilters = service.riskFilters ?? { forbiddenWords: [], requirePrimarySource: false };
 
+  // selfReplyText はサーバー側で確実に生成（Gemini に任せない）
+  const articleUrl = sourceUrl ?? (service as Record<string, unknown>).ctaUrl as string ?? null;
+  const buildSelfReply = (articleUrl: string | null) => {
+    if (articleUrl) return `詳しくはこちら ↓\n${articleUrl}`;
+    return null;
+  };
+  const selfReplyText = buildSelfReply(articleUrl);
+
   await Promise.all(
     candidates.map((c) => {
       const score = c.estimatedReachScore ?? calculateReachScore(c);
-      const riskFlags = detectRiskFlags(c.body, c.angle, c.selfReplyText, riskFilters);
+      const riskFlags = detectRiskFlags(c.body, c.angle, selfReplyText, riskFilters);
       return db.collection("channelDrafts").add({
         contentBaseId: baseRef.id,
         serviceId,
@@ -194,7 +202,7 @@ export async function POST(req: NextRequest) {
         hook: c.hook,
         body: c.body,
         bodyShort: c.bodyShort ?? null,
-        selfReplyText: c.selfReplyText ?? null,
+        selfReplyText,
         hashtags: c.hashtags,
         estimatedReachScore: score,
         riskFlags,
