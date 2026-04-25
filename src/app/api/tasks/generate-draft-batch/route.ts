@@ -98,11 +98,15 @@ export async function POST(req: NextRequest) {
   const draftRefs = await Promise.all(
     candidates.map((c) => {
       const score = c.estimatedReachScore ?? calculateReachScore(c);
+      const riskFilters = service.riskFilters ?? {
+        forbiddenWords: [],
+        requirePrimarySource: false,
+      };
       const riskFlags = detectRiskFlags(
         c.body,
         c.angle,
         c.selfReplyText,
-        service.riskFilters
+        riskFilters
       );
       const status = riskFlags.length > 0 ? "BLOCKED" : "PENDING_REVIEW";
 

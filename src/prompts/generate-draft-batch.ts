@@ -40,13 +40,15 @@ export function buildDraftBatchPrompt(
     .map(([k, v]) => `- **${k}**: ${v}`)
     .join("\n");
 
+  const svc = service as Record<string, unknown>;
+
   return `あなたは${service.persona}として、以下のネタから X（旧Twitter）投稿ドラフトを **21本（7切り口 × 3トーン）** 生成してください。
 
 ## サービス情報
 - サービス名: ${service.name}
-- カテゴリ: ${service.category}
+- カテゴリ: ${(svc.category as string) ?? service.name}
 - CTA: 「${service.ctaText ?? "詳しくはbioのリンクから"}」
-- 禁止ワード: ${service.riskFilters.forbiddenWords.join("・")}
+- 禁止ワード: ${(service.riskFilters?.forbiddenWords ?? []).join("・") || "なし"}
 
 ## ネタ情報
 - タイトル: ${base.title}
@@ -91,6 +93,6 @@ ${tones}
 - 必ず **21本すべて** を出力すること（7切り口 × 3トーン の組み合わせ網羅）
 - 各 hook は互いに重複しないこと、禁止リストとも重複しないこと
 - NEWS切り口は news-fast-track 向けなので鮮度を重視した表現に
-- ${service.riskFilters.forbiddenWords.join("・")} の表現は絶対に使わない
+- ${(service.riskFilters?.forbiddenWords ?? []).join("・")} の表現は絶対に使わない
 - estimatedReachScore は 0〜100 の自己評価（DATA+チェックリストは高め、URLのみは低め）`;
 }
