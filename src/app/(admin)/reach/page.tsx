@@ -1,0 +1,70 @@
+import { getFirestore } from "@/lib/firestore/client";
+import { getServiceIdsForCurrentUser } from "@/lib/auth/server-session";
+import type { ChannelDraft } from "@/lib/firestore/schemas";
+import { ReachClient } from "./ReachClient";
+
+const ANGLE_LABELS: Record<string, string> = {
+  DATA: "📊 数字", EMOTION: "💙 感情", STORY: "📖 体験",
+  HOWTO: "🔧 手順", QUESTION: "❓ 問い", PARADOX: "⚡ 逆説", NEWS: "📰 速報",
+};
+
+async function fetchReachDrafts() {
+  try {
+    const db = getFirestore();
+    const serviceIds = await getServiceIdsForCurrentUser(db);
+    if (serviceIds.length === 0) return [];
+
+    const snap = await db
+      .collection("channelDrafts")
+      .where("serviceId", "in", serviceIds)
+      .where("status", "in", ["STOCKED", "SCHEDULED"])
+      .limit(100)
+      .get();
+    return snap.docs
+      .map((d) => ({ ...(d.data() as ChannelDraft), id: d.id }))
+      .sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0));
+  } catch (e) {
+    console.error("Reach drafts fetch error:", e);
+    return [];
+  }
+}
+
+export default async function ReachPage() {
+  const allDrafts = await fetchReachDrafts();
+
+  const stocked = allDrafts
+    .filter((d) => d.status === "STOCKED")
+    .map((d) => ({
+      id: d.id,
+      channel: d.channel ?? "x",
+      angle: d.angle ?? "DATA",
+      angleLabel: ANGLE_LABELS[d.angle ?? "DATA"] ?? d.angle ?? "",
+      tone: d.tone ?? "friendly",
+      hook: d.hook ?? (d.body ?? "").slice(0, 15),
+      body: d.body ?? (d as unknown as Record<string, string>).content ?? "",
+      selfReplyText: d.selfReplyText ?? null,
+      hashtags: d.hashtags ?? [],
+      estimatedReachScore: d.estimatedReachScore ?? 50,
+      riskFlags: d.riskFlags ?? [],
+      createdAt: d.createdAt?.toMillis() ?? 0,
+    }));
+
+  const scheduled = allDrafts
+    .filter((d) => d.status === "SCHEDULED")
+    .map((d) => ({
+      id: d.id,
+      channel: d.channel ?? "x",
+      angle: d.angle ?? "DATA",
+      angleLabel: ANGLE_LABELS[d.angle ?? "DATA"] ?? d.angle ?? "",
+      hook: d.hook ?? (d.body ?? "").slice(0, 15),
+      body: d.body ?? (d as unknown as Record<string, string>).content ?? "",
+      estimatedReachScore: d.estimatedReachScore ?? 50,
+      scheduledAt: d.scheduledAt?.toMillis() ?? null,
+    }));
+
+  return (
+    <div className="page-wrap">
+      <ReachClient stockedDrafts={stocked} scheduledDrafts={scheduled} />
+    </div>
+  );
+}

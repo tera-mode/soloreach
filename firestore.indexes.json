@@ -17,6 +17,8 @@
     { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
       "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" }] },
     { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "channelDrafts", "queryScope": "COLLECTION",
       "fields": [{ "fieldPath": "channel", "order": "ASCENDING" }, { "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
     { "collectionGroup": "publishExecutions", "queryScope": "COLLECTION",
       "fields": [{ "fieldPath": "serviceId", "order": "ASCENDING" }, { "fieldPath": "publishedAt", "order": "DESCENDING" }] },

@@ -1,17 +1,23 @@
 import { getFirestore } from "@/lib/firestore/client";
+import { getServiceIdsForCurrentUser } from "@/lib/auth/server-session";
 import { DraftsClient } from "./DraftsClient";
 import type { ChannelDraft } from "@/lib/firestore/schemas";
 
 async function fetchDrafts() {
   try {
     const db = getFirestore();
+    const serviceIds = await getServiceIdsForCurrentUser(db);
+    if (serviceIds.length === 0) return [];
+
     const snap = await db
       .collection("channelDrafts")
-      .orderBy("createdAt", "desc")
+      .where("serviceId", "in", serviceIds)
       .limit(150)
       .get();
 
-    return snap.docs.map((d) => ({ ...(d.data() as ChannelDraft), id: d.id }));
+    return snap.docs
+      .map((d) => ({ ...(d.data() as ChannelDraft), id: d.id }))
+      .sort((a, b) => (b.createdAt?.toMillis() ?? 0) - (a.createdAt?.toMillis() ?? 0));
   } catch (e) {
     console.error("Drafts fetch error:", e);
     return [];

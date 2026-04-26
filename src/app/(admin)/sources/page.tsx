@@ -1,4 +1,6 @@
+import { FieldPath } from "@google-cloud/firestore";
 import { getFirestore } from "@/lib/firestore/client";
+import { getServiceIdsForCurrentUser } from "@/lib/auth/server-session";
 import { QuickAddForm } from "./QuickAddForm";
 import { IconRss, IconLink, IconText } from "@/components/icons/NavIcons";
 import type { ContentSource } from "@/lib/firestore/schemas";
@@ -6,12 +8,25 @@ import type { ContentSource } from "@/lib/firestore/schemas";
 async function fetchData() {
   try {
     const db = getFirestore();
+    const serviceIds = await getServiceIdsForCurrentUser(db);
+
+    if (serviceIds.length === 0) {
+      return { sources: [], services: [], history: [] };
+    }
+
     const [sourcesSnap, servicesSnap, basesSnap] = await Promise.all([
-      db.collection("contentSources").orderBy("createdAt", "desc").limit(20).get(),
-      db.collection("services").limit(5).get(),
-      db.collection("contentBases").orderBy("ingestedAt", "desc").limit(20).get(),
+      db.collection("contentSources")
+        .where("serviceId", "in", serviceIds)
+        .limit(20).get(),
+      db.collection("services")
+        .where(FieldPath.documentId(), "in", serviceIds).get(),
+      db.collection("contentBases")
+        .where("serviceId", "in", serviceIds)
+        .limit(20).get(),
     ]);
-    const sources = sourcesSnap.docs.map((d) => ({ id: d.id, ...(d.data() as ContentSource) }));
+    const sources = sourcesSnap.docs
+      .map((d) => ({ id: d.id, ...(d.data() as ContentSource) }))
+      .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
     const services = servicesSnap.docs.map((d) => ({ id: d.id, name: (d.data().name as string) ?? "未設定" }));
     const history = basesSnap.docs.map((d) => ({
       id: d.id,
@@ -19,7 +34,8 @@ async function fetchData() {
       sourceUrl: d.data().sourceUrl as string | null,
       ingestedAt: (d.data().ingestedAt as { toMillis(): number })?.toMillis() ?? 0,
     }));
-    return { sources, services, history };
+    const sortedHistory = history.sort((a, b) => b.ingestedAt - a.ingestedAt);
+    return { sources, services, history: sortedHistory };
   } catch {
     return { sources: [], services: [], history: [] };
   }

@@ -48,6 +48,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (u) => {
                 setUser(u);
                 setLoading(false);
+                // セッション Cookie を同期（ページリフレッシュ後も UID をサーバーに伝達）
+                if (u) {
+                  fetch("/api/auth/session", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid: u.uid }),
+                  }).catch(() => {});
+                } else {
+                  fetch("/api/auth/session", { method: "DELETE" }).catch(() => {});
+                }
               },
               (err) => {
                 setAuthError(err.message);
@@ -69,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const ownerUids = (process.env.NEXT_PUBLIC_OWNER_UIDS || "").split(",").filter(Boolean);
-  const isOwner = !!user && ownerUids.includes(user.uid);
+  // 匿名ユーザーも isOwner として扱う（全機能利用可、セッション消去で失効）
+  const isOwner = !!user && (ownerUids.includes(user.uid) || user.isAnonymous);
 
   return (
     <AuthContext.Provider value={{ user, loading, isOwner, authError }}>

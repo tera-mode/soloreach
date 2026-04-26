@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 import { Timestamp } from "@google-cloud/firestore";
 import { v4 as uuid } from "uuid";
 import { getFirestore } from "@/lib/firestore/client";
+import { getServiceIdsForCurrentUser } from "@/lib/auth/server-session";
 import { generateText } from "@/lib/gemini";
 import { buildContentBasePrompt } from "@/prompts/generate-content-base";
 import { buildDraftBatchPrompt } from "@/prompts/generate-draft-batch";
@@ -56,18 +57,25 @@ export async function POST(req: NextRequest) {
   const { url, text, serviceId: reqServiceId } = parsed.data;
   const db = getFirestore();
 
-  // サービスを取得（指定なければ最初のもの）
+  // サービスを取得（指定なければ現在ユーザーの最初のサービス）
   let serviceId = reqServiceId;
   let service: Service;
+  const allowedServiceIds = await getServiceIdsForCurrentUser(db);
+  if (allowedServiceIds.length === 0) {
+    return NextResponse.json({ error: "利用可能なサービスがありません。" }, { status: 403 });
+  }
   if (serviceId) {
+    if (!allowedServiceIds.includes(serviceId)) {
+      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+    }
     const doc = await db.collection("services").doc(serviceId).get();
     if (!doc.exists) return NextResponse.json({ error: "Service not found" }, { status: 404 });
     service = doc.data() as Service;
   } else {
-    const snap = await db.collection("services").limit(1).get();
-    if (snap.empty) return NextResponse.json({ error: "サービスが未登録です。先に Firestore に services ドキュメントを作成してください。" }, { status: 400 });
-    serviceId = snap.docs[0].id;
-    service = snap.docs[0].data() as Service;
+    const doc = await db.collection("services").doc(allowedServiceIds[0]).get();
+    if (!doc.exists) return NextResponse.json({ error: "サービスが未登録です。" }, { status: 400 });
+    serviceId = doc.id;
+    service = doc.data() as Service;
   }
 
   // コンテンツ取得

@@ -6,7 +6,7 @@ import { IconRss, IconFileDoc, IconCalendar, IconChart, IconCog } from "@/compon
 const TABS = [
   { href: "/sources",  label: "ネタ元",   Icon: IconRss },
   { href: "/drafts",   label: "アイデア", Icon: IconFileDoc },
-  { href: "/schedule", label: "配信",     Icon: IconCalendar },
+  { href: "/reach",    label: "配信",     Icon: IconCalendar },
   { href: "/insights", label: "分析",     Icon: IconChart },
   { href: "/settings", label: "設定",     Icon: IconCog },
 ] as const;

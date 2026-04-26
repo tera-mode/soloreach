@@ -57,6 +57,12 @@ export async function POST(req: NextRequest) {
 
   const draft = draftDoc.data() as ChannelDraft;
 
+  // Guard: キャンセルされたタスクや二重実行を防ぐ
+  if (!["SCHEDULED", "APPROVED", "QUEUED"].includes(draft.status)) {
+    logger.info({ draftId, status: draft.status }, "Draft not in publishable status, skipping");
+    return NextResponse.json({ skipped: true });
+  }
+
   if (isBlocked(draft.riskFlags ?? [])) {
     return NextResponse.json({ error: "Draft is BLOCKED" }, { status: 400 });
   }

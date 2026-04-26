@@ -7,15 +7,23 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function LoginPage() {
   const { user, loading, authError } = useAuth();
   const router = useRouter();
-  const [signing, setSigning] = useState(false);
+  const [signing, setSigning] = useState<"google" | "guest" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && user) router.replace("/inbox");
+    if (!loading && user) router.replace("/drafts");
   }, [user, loading, router]);
 
+  async function setSessionCookie(uid: string) {
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid }),
+    });
+  }
+
   async function handleGoogleLogin() {
-    setSigning(true);
+    setSigning("google");
     setError(null);
     try {
       const [{ getAuth, signInWithPopup, GoogleAuthProvider }, { getFirebaseApp }] =
@@ -24,12 +32,33 @@ export default function LoginPage() {
           import("@/lib/auth/firebase-client"),
         ]);
       const auth = getAuth(getFirebaseApp());
-      await signInWithPopup(auth, new GoogleAuthProvider());
-      router.replace("/inbox");
-    } catch (e) {
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      await setSessionCookie(result.user.uid);
+      router.replace("/drafts");
+    } catch {
       setError("ログインに失敗しました。もう一度お試しください。");
     } finally {
-      setSigning(false);
+      setSigning(null);
+    }
+  }
+
+  async function handleGuestLogin() {
+    setSigning("guest");
+    setError(null);
+    try {
+      const [{ getAuth, signInAnonymously }, { getFirebaseApp }] =
+        await Promise.all([
+          import("firebase/auth"),
+          import("@/lib/auth/firebase-client"),
+        ]);
+      const auth = getAuth(getFirebaseApp());
+      const result = await signInAnonymously(auth);
+      await setSessionCookie(result.user.uid);
+      router.replace("/drafts");
+    } catch {
+      setError("ゲストログインに失敗しました。もう一度お試しください。");
+    } finally {
+      setSigning(null);
     }
   }
 
@@ -91,7 +120,7 @@ export default function LoginPage() {
         >
           管理画面にアクセスするには
           <br />
-          Google アカウントでログインしてください
+          ログインしてください
         </p>
 
         {displayError && (
@@ -114,26 +143,60 @@ export default function LoginPage() {
 
         <button
           onClick={handleGoogleLogin}
-          disabled={signing}
+          disabled={signing !== null}
           style={{
             width: "100%",
             padding: "12px 24px",
             borderRadius: "var(--r-pill)",
-            background: signing
-              ? "rgba(201,119,87,0.6)"
-              : "var(--terracotta)",
+            background: signing === "google" ? "rgba(201,119,87,0.6)" : "var(--terracotta)",
             color: "#fff",
             fontFamily: "var(--font-sans)",
             fontSize: 14,
             fontWeight: 600,
             border: "none",
-            cursor: signing ? "not-allowed" : "pointer",
+            cursor: signing !== null ? "not-allowed" : "pointer",
             boxShadow: "0 4px 12px rgba(201,119,87,0.4)",
             transition: "opacity 0.2s",
           }}
         >
-          {signing ? "ログイン中…" : "Google でログイン"}
+          {signing === "google" ? "ログイン中…" : "Google でログイン"}
         </button>
+
+        {/* 区切り */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+          <div style={{ flex: 1, height: 1, background: "rgba(40,34,26,0.12)" }} />
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: 11.5, color: "var(--text-dim)" }}>または</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(40,34,26,0.12)" }} />
+        </div>
+
+        <button
+          onClick={handleGuestLogin}
+          disabled={signing !== null}
+          style={{
+            width: "100%",
+            padding: "11px 24px",
+            borderRadius: "var(--r-pill)",
+            background: signing === "guest" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.72)",
+            color: "var(--text-muted)",
+            fontFamily: "var(--font-sans)",
+            fontSize: 14,
+            fontWeight: 600,
+            border: "1.5px solid rgba(40,34,26,0.12)",
+            cursor: signing !== null ? "not-allowed" : "pointer",
+            transition: "opacity 0.2s",
+          }}
+        >
+          {signing === "guest" ? "入室中…" : "ゲストとして試す"}
+        </button>
+
+        <p style={{
+          fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--text-dim)",
+          textAlign: "center", margin: 0, lineHeight: 1.6,
+        }}>
+          ゲストセッションはブラウザのデータを消去すると
+          <br />
+          失効し、再ログインはできません
+        </p>
       </div>
     </div>
   );
