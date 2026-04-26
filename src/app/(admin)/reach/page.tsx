@@ -1,6 +1,7 @@
+import { FieldPath } from "@google-cloud/firestore";
 import { getFirestore } from "@/lib/firestore/client";
 import { getServiceIdsForCurrentUser } from "@/lib/auth/server-session";
-import type { ChannelDraft } from "@/lib/firestore/schemas";
+import type { ChannelDraft, PublishExecution } from "@/lib/firestore/schemas";
 import { ReachClient } from "./ReachClient";
 
 const ANGLE_LABELS: Record<string, string> = {
@@ -29,8 +30,60 @@ async function fetchReachDrafts() {
   }
 }
 
+async function fetchHistory() {
+  try {
+    const db = getFirestore();
+    const serviceIds = await getServiceIdsForCurrentUser(db);
+    if (serviceIds.length === 0) return [];
+
+    // 直近 30 件の配信実績を取得
+    const execsSnap = await db
+      .collection("publishExecutions")
+      .where("serviceId", "in", serviceIds)
+      .limit(30)
+      .get();
+    if (execsSnap.empty) return [];
+
+    const execs = execsSnap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as PublishExecution),
+    }));
+
+    // 対応ドラフトを一括取得
+    const draftIds = [...new Set(execs.map((e) => e.draftId))];
+    const draftsSnap = await db
+      .collection("channelDrafts")
+      .where(FieldPath.documentId(), "in", draftIds)
+      .get();
+    const draftsMap = Object.fromEntries(
+      draftsSnap.docs.map((d) => [d.id, d.data() as ChannelDraft])
+    );
+
+    return execs
+      .map((exec) => {
+        const draft = draftsMap[exec.draftId];
+        return {
+          id: exec.id,
+          draftId: exec.draftId,
+          channel: exec.channel ?? "x",
+          externalUrl: exec.externalUrl ?? null,
+          publishedAt: exec.publishedAt?.toMillis() ?? 0,
+          angle: draft?.angle ?? "DATA",
+          angleLabel: ANGLE_LABELS[draft?.angle ?? "DATA"] ?? "",
+          hook: draft?.hook ?? (draft?.body ?? "").slice(0, 15),
+          body: draft?.body ?? (draft as unknown as Record<string, string>)?.content ?? "",
+          estimatedReachScore: draft?.estimatedReachScore ?? 50,
+        };
+      })
+      .sort((a, b) => b.publishedAt - a.publishedAt);
+  } catch (e) {
+    console.error("History fetch error:", e);
+    return [];
+  }
+}
+
 export default async function ReachPage() {
-  const allDrafts = await fetchReachDrafts();
+  const [allDrafts, history] = await Promise.all([fetchReachDrafts(), fetchHistory()]);
 
   const stocked = allDrafts
     .filter((d) => d.status === "STOCKED")
@@ -64,7 +117,7 @@ export default async function ReachPage() {
 
   return (
     <div className="page-wrap">
-      <ReachClient stockedDrafts={stocked} scheduledDrafts={scheduled} />
+      <ReachClient stockedDrafts={stocked} scheduledDrafts={scheduled} historyItems={history} />
     </div>
   );
 }

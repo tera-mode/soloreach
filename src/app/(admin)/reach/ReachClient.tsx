@@ -17,7 +17,14 @@ export interface ScheduledDraftItem {
   hook: string; body: string; estimatedReachScore: number; scheduledAt: number | null;
 }
 
-type Mode = "now" | "schedule";
+export interface HistoryItem {
+  id: string; draftId: string; channel: string;
+  externalUrl: string | null; publishedAt: number;
+  angle: string; angleLabel: string;
+  hook: string; body: string; estimatedReachScore: number;
+}
+
+type Mode = "now" | "schedule" | "history";
 
 const SCORE_COLOR = (s: number) =>
   s >= 80 ? "var(--sage)" : s >= 60 ? "var(--ochre)" : s >= 40 ? "var(--terracotta)" : "var(--navy)";
@@ -374,14 +381,100 @@ function ScheduledCard({
   );
 }
 
+// ─── HistoryCard: 配信履歴カード ──────────────────────────────────────────────
+
+function HistoryCard({ item }: { item: HistoryItem }) {
+  const [expanded, setExpanded] = useState(false);
+  const score = item.estimatedReachScore;
+  const scoreColor = SCORE_COLOR(score);
+
+  const dateStr = item.publishedAt
+    ? new Date(item.publishedAt).toLocaleString("ja-JP", {
+        month: "numeric", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      })
+    : "—";
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.72)",
+      borderRadius: "var(--r-md)",
+      border: "1px solid rgba(255,255,255,0.60)",
+      boxShadow: "0 2px 8px rgba(40,35,30,0.06)",
+      position: "relative", overflow: "hidden",
+    }}>
+      <div style={{
+        position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
+        background: scoreColor,
+      }} />
+
+      <div onClick={() => setExpanded((v) => !v)} style={{ padding: "10px 12px 8px 16px", cursor: "pointer" }}>
+        {/* バッジ行 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 5 }}>
+          <ChannelBadge channel={item.channel} />
+          <span className="badge" style={{ background: `${scoreColor}22`, color: scoreColor }}>
+            {item.angleLabel}
+          </span>
+          <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-dim)" }}>
+            {dateStr}
+          </span>
+          {expanded
+            ? <IconChevronUp size={15} color="var(--text-dim)" />
+            : <IconChevronDown size={15} color="var(--text-dim)" />
+          }
+        </div>
+
+        {/* フック */}
+        <p style={{ margin: "0 0 3px", fontFamily: "var(--font-serif)", fontSize: 14, fontWeight: 600, color: "var(--text)", lineHeight: 1.4 }}>
+          {item.hook}
+        </p>
+
+        {/* 本文（折りたたみ） */}
+        <p style={{
+          margin: 0, fontSize: 12.5, color: "var(--text-soft)", lineHeight: 1.65,
+          display: "-webkit-box", WebkitBoxOrient: "vertical",
+          WebkitLineClamp: expanded ? undefined : 2,
+          overflow: expanded ? "visible" : "hidden",
+          whiteSpace: "pre-wrap",
+        }}>
+          {item.body}
+        </p>
+      </div>
+
+      {/* X ポストへのリンク */}
+      {item.externalUrl && (
+        <div style={{ padding: "0 12px 10px 16px" }}>
+          <a
+            href={item.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              padding: "5px 12px", borderRadius: "var(--r-md)",
+              background: "rgba(0,0,0,0.82)", color: "#fff",
+              fontFamily: "var(--font-mono)", fontSize: 11.5, fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            𝕏 ポストを開く ↗
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── ReachClient: メインコンポーネント ────────────────────────────────────────
 
 export function ReachClient({
   stockedDrafts,
   scheduledDrafts,
+  historyItems,
 }: {
   stockedDrafts: StockedDraft[];
   scheduledDrafts: ScheduledDraftItem[];
+  historyItems: HistoryItem[];
 }) {
   const [mode, setMode] = useState<Mode>("now");
   const [stocked, setStocked] = useState(stockedDrafts);
@@ -470,10 +563,11 @@ export function ReachClient({
 
       {/* ─ モード切替タブ ─ */}
       <div style={{ position: "sticky", top: 0, zIndex: 100, background: "transparent", padding: "8px 0 6px" }}>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 5 }}>
           {([
-            { key: "now" as Mode, label: "⚡ 今すぐ配信", color: "var(--terracotta)" },
-            { key: "schedule" as Mode, label: "📅 予定配信", color: "var(--ochre)" },
+            { key: "now" as Mode,      label: "⚡ 今すぐ",  color: "var(--terracotta)" },
+            { key: "schedule" as Mode, label: "📅 予定",    color: "var(--ochre)" },
+            { key: "history" as Mode,  label: "📋 履歴",    color: "var(--navy)" },
           ] as const).map(({ key, label, color }) => {
             const active = mode === key;
             return (
@@ -481,10 +575,10 @@ export function ReachClient({
                 key={key}
                 onClick={() => { setMode(key); setExpandedId(null); }}
                 style={{
-                  flex: 1, padding: "9px 6px", borderRadius: "var(--r-md)",
+                  flex: 1, padding: "9px 4px", borderRadius: "var(--r-md)",
                   border: active ? `1.5px solid ${color}40` : "1.5px solid transparent",
                   cursor: "pointer",
-                  fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: active ? 700 : 500,
+                  fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: active ? 700 : 500,
                   background: active ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.45)",
                   color: active ? color : "var(--text-muted)",
                   boxShadow: active ? "var(--shadow-soft)" : "none",
@@ -525,6 +619,32 @@ export function ReachClient({
               />
             ))}
           </div>
+        </>
+      )}
+
+      {/* ─ 配信履歴タブ ─ */}
+      {mode === "history" && (
+        <>
+          {historyItems.length === 0 ? (
+            <div className="card">
+              <div className="empty-state">
+                <span className="empty-icon">📋</span>
+                <p className="empty-title">配信履歴がありません</p>
+                <p className="empty-sub">配信したポストがここに記録されます</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="label" style={{ paddingLeft: 2 }}>
+                配信済み <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>({historyItems.length}件)</span>
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {historyItems.map((item) => (
+                  <HistoryCard key={item.id} item={item} />
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 
