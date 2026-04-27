@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BottomNav } from "@/components/nav/BottomNav";
+import { TopNav } from "@/components/nav/TopNav";
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isOwner, authError } = useAuth();
@@ -29,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className="app-bg"
         style={{ minHeight: "100dvh" }}
       >
+        <TopNav />
         <AdminGuard>{children}</AdminGuard>
         <BottomNav />
       </div>

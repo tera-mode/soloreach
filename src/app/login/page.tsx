@@ -71,20 +71,24 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "100vh",
+        height: "100dvh",
+        overflow: "hidden",
+        padding: "16px",
       }}
     >
       <div
         className="glass"
         style={{
-          padding: 40,
+          padding: "32px 28px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 24,
+          gap: 20,
           borderRadius: "var(--r-xl)",
           maxWidth: 360,
           width: "100%",
+          maxHeight: "calc(100dvh - 32px)",
+          overflowY: "auto",
         }}
       >
         {/* Logo */}

@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { IconRss, IconFileDoc, IconCalendar, IconChart, IconCog } from "@/components/icons/NavIcons";
+import { IconRss, IconFileDoc, IconCalendar, IconChart, IconPlug } from "@/components/icons/NavIcons";
 
 const TABS = [
-  { href: "/sources",  label: "ネタ元",   Icon: IconRss },
-  { href: "/drafts",   label: "アイデア", Icon: IconFileDoc },
-  { href: "/reach",    label: "配信",     Icon: IconCalendar },
-  { href: "/insights", label: "分析",     Icon: IconChart },
-  { href: "/settings", label: "設定",     Icon: IconCog },
+  { href: "/sources",  label: "ネタ元",     Icon: IconRss },
+  { href: "/drafts",   label: "アイデア",   Icon: IconFileDoc },
+  { href: "/reach",    label: "配信",       Icon: IconCalendar },
+  { href: "/insights", label: "分析",       Icon: IconChart },
+  { href: "/connect",  label: "コネクト",   Icon: IconPlug },
 ] as const;
 
 export function BottomNav() {

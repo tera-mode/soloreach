@@ -1,20 +1,18 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { IconLogout, IconCog, IconCalendar, IconRss } from "@/components/icons/NavIcons";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  IconLogout,
+  IconUserCircle,
+  IconCog,
+  IconCalendar,
+  IconRss,
+} from "@/components/icons/NavIcons";
 
 export default function SettingsPage() {
-  const params = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
-  const [serviceId, setServiceId] = useState("");
-  const [xConnected, setXConnected] = useState(false);
-
-  useEffect(() => {
-    if (params.get("x") === "connected") setXConnected(true);
-  }, [params]);
 
   async function handleSignOut() {
     const { getAuth, signOut } = await import("firebase/auth");
@@ -31,6 +29,10 @@ export default function SettingsPage() {
 
       {/* ユーザー情報 */}
       <div className="card">
+        <div className="card-header">
+          <span className="card-title">アカウント</span>
+          <IconUserCircle size={16} color="var(--text-dim)" />
+        </div>
         <div className="card-body" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{
             width: 44, height: 44, borderRadius: "50%",
@@ -62,59 +64,28 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* X 接続 */}
+      {/* アプリ設定 */}
       <div className="card">
         <div className="card-header">
-          <span className="card-title">X (Twitter) 接続</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--navy)" }}>𝕏</span>
-        </div>
-        <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {xConnected && (
-            <div style={{
-              padding: "8px 12px", borderRadius: "var(--r-md)",
-              background: "var(--sage-glass)", color: "var(--sage)",
-              fontFamily: "var(--font-sans)", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
-            }}>
-              ✅ X アカウントを接続しました
-            </div>
-          )}
-          <p className="label">OAuth 2.0 PKCE で接続します。ドラフト承認後の自動投稿に必要です。</p>
-          <input
-            className="input"
-            placeholder="Service ID（Firestore で確認）"
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
-          />
-          <button
-            className="btn-primary"
-            style={{ justifyContent: "center" }}
-            onClick={() => { if (serviceId) window.location.href = `/api/integrations/x/install?serviceId=${serviceId}`; }}
-          >
-            <span style={{ fontWeight: 700 }}>𝕏</span>
-            X で接続する
-          </button>
-        </div>
-      </div>
-
-      {/* その他 */}
-      <div className="card">
-        <div className="card-header">
-          <span className="card-title">Sprint C 以降で実装予定</span>
+          <span className="card-title">アプリ設定</span>
+          <IconCog size={16} color="var(--text-dim)" />
         </div>
         <div className="card-body">
           {[
-            ["📅", "配信スケジュール設定"],
-            ["🛡️", "リスクフィルター管理"],
-            ["📡", "RSS ソース追加"],
-          ].map(([emoji, label]) => (
+            { Icon: IconCalendar, label: "配信スケジュール設定", note: "Sprint C で実装予定" },
+            { Icon: IconRss, label: "リスクフィルター管理", note: "Sprint C で実装予定" },
+          ].map(({ Icon, label, note }) => (
             <div key={label} style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.25)",
-              opacity: 0.6,
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "11px 0", borderBottom: "1px solid rgba(255,255,255,0.25)",
+              opacity: 0.55,
             }}>
-              <span style={{ fontSize: 16 }}>{emoji}</span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)" }}>{label}</span>
-              <span style={{ color: "var(--text-dim)", marginLeft: "auto", fontSize: 18 }}>›</span>
+              <Icon size={16} color="var(--text-muted)" />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)" }}>{label}</p>
+                <p style={{ margin: 0, fontFamily: "var(--font-sans)", fontSize: 11, color: "var(--text-dim)" }}>{note}</p>
+              </div>
+              <span style={{ color: "var(--text-dim)", fontSize: 18 }}>›</span>
             </div>
           ))}
         </div>
