@@ -17,7 +17,6 @@ export function BottomNav() {
 
   return (
     <nav
-      className="glass"
       style={{
         position: "fixed",
         bottom: 0,
@@ -30,12 +29,16 @@ export function BottomNav() {
         zIndex: 200,
         display: "flex",
         alignItems: "stretch",
-        borderBottom: "none",
+        background: "rgba(68, 34, 18, 0.94)",
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        borderTop: "1px solid rgba(180, 110, 70, 0.30)",
+        boxShadow: "0 -4px 24px rgba(40, 20, 10, 0.30)",
       }}
     >
       {TABS.map(({ href, label, Icon }) => {
         const active = pathname.startsWith(href);
-        const color = active ? "var(--terracotta)" : "var(--text-muted)";
+        const color = active ? "#FFCBA4" : "rgba(255, 200, 165, 0.52)";
 
         return (
           <button
@@ -63,10 +66,10 @@ export function BottomNav() {
                 top: 0,
                 left: "50%",
                 transform: "translateX(-50%)",
-                width: 24,
+                width: 28,
                 height: 3,
                 borderRadius: "0 0 4px 4px",
-                background: "var(--terracotta)",
+                background: "#FFCBA4",
               }} />
             )}
 
