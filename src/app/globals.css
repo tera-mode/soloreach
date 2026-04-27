@@ -165,7 +165,7 @@ html, body {
 
 /* ─── Mobile-first Layout ────────────────────────────────────── */
 .page-wrap {
-  padding: 88px 14px 88px;
+  padding: 12px 14px 88px;
   max-width: 520px;
   margin: 0 auto;
   display: flex;
